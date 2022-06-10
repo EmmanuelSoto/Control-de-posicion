@@ -1,0 +1,47 @@
+import pybullet as p
+import pybullet_data
+import os
+import time
+import math
+
+file_name = "2R_Robotic_Arm.urdf"
+p.connect(p.GUI)
+p.loadURDF(os.path.join(pybullet_data.getDataPath(), "plane.urdf"), 0, 0, 0)
+orn = p.getQuaternionFromEuler([0, 0, 0])
+robot = p.loadURDF(file_name, [0, 0, 0], orn)
+
+p.createConstraint(parentBodyUniqueId=robot, parentLinkIndex=0, childBodyUniqueId=-1,
+                   childLinkIndex=-1, jointType=p.JOINT_POINT2POINT, jointAxis=[1, 0, 0],
+                   parentFramePosition=[0, 0, 0], childFramePosition=[0, 0, 0])
+
+
+l1 = 1
+l2 = 1
+
+def Cin_Directa(ang_1, ang_2):
+
+    y = (l1 * math.cos(ang_1)) + (l2 * math.cos((ang_1 + ang_2)))
+    z = (l1 * math.sin(ang_1)) + (l2 * math.sin(ang_1 + ang_2))
+
+    print("\nPosición de efector final : ")
+    print(f"y : {y:.2f}, z : {z:.2f}")
+
+
+#Cambiar los valores de los ángulos
+ang_1, ang_2 = [1, 1]
+Cin_Directa(ang_1, ang_2)
+
+while True:
+    p.setJointMotorControl2(bodyIndex=robot,
+                            jointIndex=0,
+                            controlMode=p.POSITION_CONTROL,
+                            targetPosition=ang_1,
+                            force=2000)
+
+    p.setJointMotorControl2(bodyIndex=robot,
+                            jointIndex=1,
+                            controlMode=p.POSITION_CONTROL,
+                            targetPosition=ang_2,
+                            force=2000)
+    p.stepSimulation()
+    time.sleep(1. / 240.)
